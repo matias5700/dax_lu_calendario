@@ -1,0 +1,24 @@
+lu_tiempo = 
+ ADDCOLUMNS ( 
+ 
+ CALENDAR(min(ft_ventas[Fecha]),max(ft_ventas[Fecha])), 
+ 
+ "aniomes", FORMAT ([Date] , "YYYYMM" ), 
+
+ "aniomesdia", FORMAT ( [Date], "YYYYMMDD" ), 
+ 
+ "año", YEAR ( [Date] ), 
+ 
+ "id_mes", FORMAT ( [Date], "MM" ), 
+ 
+ "desc_mes_corto", FORMAT ( [Date], "mmm", "es-ar" ), 
+ 
+ "desc_mes_largo", FORMAT ( [Date], "mmmm","es-ar" ), 
+ 
+ "id_diasemana", WEEKDAY ( [Date] ), 
+ 
+ "desc_diasemana", FORMAT ( [Date], "dddd","es-ar" ), 
+ 
+ "desc_diasemana_corto", FORMAT ( [Date], "ddd" ,"es-ar") 
+ 
+)
