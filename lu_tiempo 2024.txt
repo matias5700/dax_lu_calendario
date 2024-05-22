@@ -23,3 +23,5 @@ VAR _calendario =
        // "desc_diasemana", FORMAT ( [Date], "dddd","es-ar" ), 
        // "desc_diasemana_corto", FORMAT ( [Date], "ddd" ,"es-ar")
     )
+RETURN
+_calendario
