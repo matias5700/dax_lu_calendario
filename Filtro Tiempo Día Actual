@@ -1,0 +1,23 @@
+------------------------------------
+Filtro Dia = 
+VAR _maximoDia = MAX(lu_tiempo[fecha])
+--VAR _diaActual = FORMAT(NOW(), "dd/mm/yyyy")
+VAR _diaImpeccion = lu_tiempo[fecha]
+VAR _calculo =
+IF(_maximoDia = _diaImpeccion,
+    "Dia Actual",
+    FORMAT(lu_tiempo[fecha], "dd/mm/yyyy")
+)
+RETURN
+_calculo
+--------------------------------------------------------
+Filtro Mes = 
+VAR _mesActual = FORMAT(NOW(), "yyyymm")
+VAR _mesImpeccion = FORMAT(lu_tiempo[fecha], "yyyymm")
+VAR _calculo =
+IF(_mesActual = _mesImpeccion,
+    "Mes Actual",
+    lu_tiempo[desc_mes_largo]
+)
+RETURN
+_calculo
