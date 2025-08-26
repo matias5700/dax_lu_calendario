@@ -1,0 +1,36 @@
+lu_tiempo = 
+
+//   ----- Inicializo las fechas limites  para armar el calendario  ----------
+VAR _FechaMinVta = MIN('ft_jugadon'[Fecha])
+--VAR _FechaMaxVta = MAX('ft_jugadon'[Fecha])
+VAR _FechaMaxVta = EOMONTH(MAX(ft_jugadon[Fecha]), 0)
+//  ------ Creo la primer columna con CALENDAR  -----------------------------
+VAR _tabla =
+CALENDAR(
+    _FechaMinVta,
+    _FechaMaxVta
+    )
+// ------ Selecciono todas las variables que voy a usar en el modelo
+VAR _calendario =
+    SELECTCOLUMNS (
+        _tabla,
+        "Date",[Date],
+        "dia", DAY([Date]),
+        --"dia", FORMAT([Date],"d"),
+        "desc_mes_dia", FORMAT ( [Date], "dd-mmm", "es-ar" ), 
+        "aniomes", FORMAT ([Date] , "YYYYMM" ), 
+        "aniomesdia", FORMAT ( [Date], "YYYYMMDD" ), 
+        
+        "año", YEAR ( [Date] ), 
+        "id_mes", FORMAT ( [Date], "MM" ),
+        "desc_mes_corto", FORMAT ( [Date], "mmm", "es-ar" ), 
+        "desc_mes_largo", FORMAT ( [Date], "mmmm","es-ar" ),
+        "DíasEnElMes", DAY(EOMONTH([Date], 0)),
+        "id_diasemana", WEEKDAY ( [Date] ), 
+        "desc_dias", FORMAT ( [Date], "d-mmm-yy" ),
+        "diasemana",  WEEKNUM([Date]),
+        "desc_diasemana_corto", FORMAT ([Date] , "ddd" ,"es-ar"),
+        "desc_mesanio",FORMAT([Date], "mmm'yy","es-ar")
+    )
+RETURN
+_calendario
