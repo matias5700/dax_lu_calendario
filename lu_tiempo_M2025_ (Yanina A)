@@ -1,0 +1,112 @@
+let
+
+//Calendario Yanina Ariadna
+
+    fnCalendarioEspanol = (AdjustedStartDate as date, FechaFinal as date) as table =>
+    let
+        AñoHoy = Date.Year(DateTime.LocalNow()),
+
+        // Crear la lista de fechas
+        DayCount = Duration.Days(FechaFinal - AdjustedStartDate) + 1,
+        Source = List.Dates(AdjustedStartDate, DayCount, #duration(1, 0, 0, 0)),
+        TableFechas = Table.FromList(Source, Splitter.SplitByNothing(), {"Fecha"}, null, ExtraValues.Error),
+        TableFechasTyped = Table.TransformColumnTypes(TableFechas, {{"Fecha", type date}}),
+
+        // Agregar columnas derivadas
+        AddCustom = Table.AddColumn(
+            TableFechasTyped,
+            "Custom",
+            each 
+                let
+                    d = [Fecha],
+                    yr = Date.Year(d),
+                    mon = Date.Month(d),
+                    qtr = Date.QuarterOfYear(d),
+                    weekNum = Date.WeekOfYear(d),
+                    dayNum = Date.DayOfWeek(d, Day.Monday) + 1,
+                    monthName = Text.Proper(Date.MonthName(d, "es-ES")),
+                    mesCorto = Text.Start(monthName, 3)
+                in
+                    [
+                        Year = yr,
+                        TrimestreCalendario = "Q" & Text.From(qtr),
+                        MesNumero = mon,
+                        NombreMes = monthName,
+                        MesCorto = mesCorto,
+                        YearMes = yr * 100 + mon,
+                        MesYYear = mesCorto & " " & Text.From(yr),
+                        SemanaNumero = weekNum,
+                        SemanaCorto = "Sem-" & Text.From(weekNum),
+                        DiaNumero = dayNum,
+                        DiaNombre = Text.Proper(Date.DayOfWeekName(d, "es-ES")),
+                        DiaCorto = Text.Start(Text.Proper(Date.DayOfWeekName(d, "es-ES")), 3)
+                    ]
+        ),
+
+        // Expandir columna personalizada
+        Expanded = Table.ExpandRecordColumn(
+            AddCustom,
+            "Custom",
+            {
+                "Year", "TrimestreCalendario", "MesNumero", "NombreMes", "MesCorto",
+                "YearMes", "MesYYear", "SemanaNumero", "SemanaCorto", "DiaNumero",
+                "DiaNombre", "DiaCorto"
+            }
+        ),
+
+        // Agregar clasificación de año
+        AddCodClasificacionYear = Table.AddColumn(
+            Expanded,
+            "Cod_Clasificacion Year",
+            each [Year] - AñoHoy,
+            Int64.Type
+        ),
+        AddClasificacionYear = Table.AddColumn(
+            AddCodClasificacionYear,
+            "Clasificacion Year",
+            each 
+                let diff = [Cod_Clasificacion Year]
+                in 
+                    if diff = 0 then "Actual" 
+                    else if diff = -1 then "Anterior" 
+                    else if diff < 0 then Text.From(Number.Abs(diff)) & " Anterior" 
+                    else if diff = 1 then "Posterior" 
+                    else Text.From(diff) & " Posterior",
+            type text
+        ),
+
+        // Reordenar columnas
+        OrderedColumns = Table.ReorderColumns(
+            AddClasificacionYear,
+            {
+                "Fecha", "Year", "TrimestreCalendario", "YearMes", "MesYYear", "MesNumero",
+                "MesCorto", "NombreMes", "SemanaNumero", "SemanaCorto", "DiaNumero",
+                "DiaCorto", "DiaNombre", "Cod_Clasificacion Year", "Clasificacion Year"
+            }
+        ),
+
+        // Cambiar tipos de datos
+        ChangedTypes = Table.TransformColumnTypes(
+            OrderedColumns,
+            {
+                {"Fecha", type date},
+                {"Year", Int64.Type},
+                {"TrimestreCalendario", type text},
+                {"YearMes", Int64.Type},
+                {"MesYYear", type text},
+                {"MesNumero", Int64.Type},
+                {"MesCorto", type text},
+                {"NombreMes", type text},
+                {"SemanaNumero", Int64.Type},
+                {"SemanaCorto", type text},
+                {"DiaNumero", Int64.Type},
+                {"DiaCorto", type text},
+                {"DiaNombre", type text},
+                {"Cod_Clasificacion Year", Int64.Type},
+                {"Clasificacion Year", type text}
+            }
+        )
+    in
+        ChangedTypes
+in
+    fnCalendarioEspanol
